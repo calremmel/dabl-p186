@@ -578,8 +578,6 @@ def plot_confusion_matrix(filename=None, config_file="config.yml"):
     sns.heatmap(confusion_matrix(y, y_pred), cmap="Greens", annot=True, fmt="d")
     plt.ylabel("True")
     plt.xlabel("Predicted")
-    # plt.yticks(labels=config["CLASSES"], rotation=0)
-    # plt.xticks(labels=config["CLASSES"], rotation=90)
     plt.title(plot_title)
     plt.tight_layout()
     plt.savefig(plot_filename)
@@ -606,7 +604,7 @@ def plot_pca(config_file="config.yml"):
 
     datamap = pd.concat([y, pd.DataFrame(components)], axis=1)
     datamap.columns = ["Group", "First Component", "Second Component"]
-    datamap.to_csv(plot_filename.split(".")[0] + ".csv")
+    datamap.to_csv(plot_filename[:-4] + ".csv", index=False)
     fig, ax = plt.subplots(figsize=(7, 6.5))
     sns.scatterplot(
         x="First Component",
