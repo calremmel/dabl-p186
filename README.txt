@@ -3,7 +3,7 @@
 # PI          : Prof. Margaret E. Ackerman
 # Project     : P186
 # Description : Help file for running the scripts to analyze Fc Array measurements
-#				associated with P186
+#		associated with P186
 # ******************************************************************************
 
 # Copyright (C) <2019>  <Christopher Remmel>
@@ -28,14 +28,33 @@ Input Files (in the directory data/)
 #***********************
 
 #***********************
+Installation
+
+Use conda to install the environment necessary to run these scripts. If you do not have conda installed, you may do so here:
+https://docs.anaconda.com/anaconda/install/
+
+From the root directory, execute the following commands:
+
+#-----------------------
+conda env create -f environment.yml
+conda activate dabl
+#-----------------------
+
+The first command need only be run once, and might take a while to execute. The second command you will need to run every time
+you wish to use these scripts.
+
+#***********************
+All of the remaining commands are to be run from the src/ directory.
+
 To run the feature selection pipeline, execute the following two commands:
 #***********************
 
 #-----------------------
-1. python interface.py --command=select --config=config_2a3a.yml
-   OR
-   python interface.py --command=select --config=config_3aOnly.yml
-Takes about XX min to complete
+1. 
+# For 2A3A version:
+python interface.py --command=select --config=config_2a3a.yml
+# For 3A only version
+python interface.py --command=select --config=config_3aOnly.yml
 #-----------------------
 ===> This script performs feature selection and classification to identify vaccine groups using the biophysical measurements
 		(1) Feature selection is done using the wrapper method Sequential Forward Floating Selection, with Logistic Regression
@@ -43,10 +62,11 @@ Takes about XX min to complete
 		(2) A plot displaying cross-validated accuracy vs number of features is produced.
 
 #-----------------------
-2. python interface.py --command=permtest --config=config_2a3a.yml
-   OR
-   python interface.py --command=permtest --config=config_3aOnly.yml
-Takes about XX min to complete
+2. 
+# For 2A3A version:
+python interface.py --command=permtest --config=config_2a3a.yml
+# For 3A only version
+python interface.py --command=permtest --config=config_3aOnly.yml
 #-----------------------
 
 ===> 
@@ -58,9 +78,11 @@ For generating remaining figures as in the manuscript, execute the following com
 #***********************
 
 #-----------------------
-1. python interface.py --command=evaluate --config=config_2a3a.yml
-   OR
-   python interface.py --command=evaluate --config=config_3aOnly.yml
+1. 
+# For 2A3A version:
+python interface.py --command=evaluate --config=config_2a3a.yml
+# For 3A only version
+python interface.py --command=evaluate --config=config_3aOnly.yml
 #-----------------------
 ===> This script generates all remaining figures. Run this after after all the above scripts have finished successfully.
 		The metrics displayed in these figures are based on Logistic Regression trained using the best feature set identified
@@ -71,9 +93,9 @@ For generating remaining figures as in the manuscript, execute the following com
 #-----------------------
 System configuration 
 #-----------------------
-OS 	: Ubuntu 14.04.5 LTS
-CPU : i7 8 cores @ 3.6 GHz
-RAM : 24 GB
+OS  : Ubuntu 18.04.2 LTS
+CPU : Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+RAM : 8 GB
 
 #-----------------------
 Software and packages (version, if specified)
