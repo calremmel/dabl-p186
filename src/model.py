@@ -94,6 +94,32 @@ def load_data(DATA, meta_cols=False, meta_return=False, config_file="config.yml"
         return X, y
 
 
+def get_steps(type, config_file="config.yml"):
+    config = load_config(config_file)
+
+    if type == "selector":
+        steps = [
+            ("correlation_filter", CorrelationThreshhold()),
+            ("logscale", FunctionTransformer(np.log1p, validate=True)),
+            ("normalize", StandardScaler()),
+            ("mutual_info", SelectKBest(score_func=mutual_info_classif, k=10)),
+        ]
+    elif type == "classifier":
+        steps = [
+            ("logscale", FunctionTransformer(np.log1p, validate=True)),
+            ("normalize", StandardScaler()),
+        ]
+
+    processed_steps = []
+
+    for step in steps:
+        key = step[0].upper()
+        if config[key]["USE"] == "Y":
+            processed_steps.append(step)
+    
+    return processed_steps
+
+
 def build_selector(X, y, clf, k=30, config_file="config.yml"):
     """Creates a feature selection pipeline.
     
@@ -128,14 +154,9 @@ def build_selector(X, y, clf, k=30, config_file="config.yml"):
     )
 
     # Instantiate pipeline steps
-    steps = [
-        ("correlation_filter", CorrelationThreshhold()),
-        ("logscale", FunctionTransformer(np.log1p, validate=True)),
-        ("normalize", StandardScaler()),
-        ("mutual_info", SelectKBest(score_func=mutual_info_classif, k=10)),
-        ("sffs", sffs),
-    ]
 
+    steps = get_steps("selector", config_file = config_file)
+    steps += [("sffs", sffs)]
     # Instantiate feature selection pipeline
     selector = Pipeline(steps=steps)
 
@@ -151,11 +172,8 @@ def build_classifier(config_file="config.yml"):
     config = load_config(config_file)
     selector = joblib.load(config["SELECTOR"])
     # Instantiate pipeline steps
-    steps = [
-        ("logscale", FunctionTransformer(np.log1p, validate=True)),
-        ("normalize", StandardScaler()),
-        ("clf", selector.steps[-1][1].estimator),
-    ]
+    steps = get_steps("classifier", config_file=config_file)
+    steps += [("clf", selector.steps[-1][1].estimator)]
 
     # Instantiate classification pipeline
     classifier = Pipeline(steps=steps)
@@ -495,7 +513,7 @@ def plot_feature_search(
     return plot_filename
 
 
-def plot_coefficients(k=None, config_file="config.yml"):
+def plot_coefficients(k='auto', config_file="config.yml"):
     """Plots coefficient bars. Logistic Regression only.
     
     Args:
@@ -509,8 +527,8 @@ def plot_coefficients(k=None, config_file="config.yml"):
     )
     plot_filename = "../output/{}_{}_coefficients.png".format(now, config["RUN_NAME"])
 
-    features = get_feature_names(k=None, config_file=config_file)
-    coefficients = get_coefficients(features)
+    features = get_feature_names(k, config_file=config_file)
+    coefficients = get_coefficients(features, config_file=config_file)
 
     df = pd.DataFrame({"Feature": features, "Coefficient": coefficients})
 
@@ -581,7 +599,7 @@ def plot_pca(config_file="config.yml"):
     )
     plot_filename = "../output/{}_{}_PCA.png".format(now, config["RUN_NAME"])
 
-    features = get_feature_names(k=None, config_file=config_file)
+    features = get_feature_names(k="auto", config_file=config_file)
     X, y = load_data(config["MAIN"], config_file=config_file)
 
     pca = PCA(n_components=2, random_state=88)
@@ -693,7 +711,7 @@ def get_feature_names(k="auto", selector_object=None, config_file="config.yml"):
         kbest_idx = steps["mutual_info"].get_support()
         feature_names = feature_names[kbest_idx].reset_index(drop=True)
 
-    sffs_idx = list(steps["sffs"].get_metric_dict()[k]["feature_idx"])
+    sffs_idx = list(steps["sffs"].get_metric_dict()[k]['feature_idx'])
 
     selected_features = feature_names[sffs_idx]
     return selected_features
@@ -710,11 +728,10 @@ def get_coefficients(feature_names, config_file="config.yml"):
     """
     config = load_config(config_file)
     X, y = load_data(config["MAIN"], config_file=config_file)
-    classifier = build_classifier()
+    classifier = build_classifier(config_file=config_file)
     print("Calculating coefficients...")
     classifier.fit(X[feature_names], y)
     coefficients = classifier.steps[-1][1].coef_[0]
-    print(classifier.steps[-1][1].coef_)
     return coefficients
 
 
