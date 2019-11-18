@@ -45,6 +45,7 @@ def evaluate(config):
     output_predictions(config_file=config)
     plot_box(config_file=config)
     plot_pca(config_file=config)
+    plot_confusion_matrix(config_file=config)
     if load_config(config)["ESTIMATOR"]["CODE"] == "LR":
         plot_coefficients(config_file=config)
 

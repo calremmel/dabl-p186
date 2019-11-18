@@ -297,13 +297,11 @@ def permtest_evaluate(config_file="config.yml", k="auto", features=None):
             for i in range(0, len(true_scores), config["CV"]["FOLDS"])
         ]
         true_scores = [np.mean(x) for x in true_scores]
-        print(true_scores)
     # get cv scores from permutation test
     permuted_scores = []
     for i in permuted:
         scores = list(permuted[i].steps[-1][1].get_metric_dict()[k]["cv_scores"])
         permuted_scores.append(np.mean(scores))
-    print(permuted_scores)
     plot_filename = plot_permutation_violins(
         true_scores, permuted_scores, config_file=config_file
     )
@@ -571,16 +569,17 @@ def plot_confusion_matrix(filename=None, config_file="config.yml"):
         filename = config["REPORT"]
 
     df = pd.read_csv(filename)
-    df = df.loc[df.group == "TEST"].copy()
+    if config['TEST'] == True:
+        df = df.loc[df.group == "TEST"].copy()
     y = df["target"]
     y_pred = df["prediction"]
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    sns.heatmap(confusion_matrix(y, y_pred), cmap="Greens", annot=True)
+    sns.heatmap(confusion_matrix(y, y_pred), cmap="Greens", annot=True, fmt="d")
     plt.ylabel("True")
     plt.xlabel("Predicted")
-    plt.yticks(ticks=[0.5, 1.5], labels=config["CLASSES"], rotation=0)
-    plt.xticks(ticks=[0.5, 1.5], labels=config["CLASSES"], rotation=90)
+    # plt.yticks(labels=config["CLASSES"], rotation=0)
+    # plt.xticks(labels=config["CLASSES"], rotation=90)
     plt.title(plot_title)
     plt.tight_layout()
     plt.savefig(plot_filename)

@@ -104,7 +104,7 @@ dependencies:
   - python (3.7)
   - scikit-learn
   - pandas
-  - matplotlib
+  - matplotlib (3.1.0)
   - seaborn
   - pyyaml
   - click
